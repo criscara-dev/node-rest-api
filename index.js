@@ -7,11 +7,58 @@
 // I create the HTTP server that listen on PORT and respond with data
 
 const http = require("http");
+const https = require("https");
 const url = require("url");
 const StringDecoder = require("string_decoder").StringDecoder;
+const config = require("./config");
+const fs = require("fs");
 
-// The server should respond to all requests with a string
-var server = http.createServer(function(req, res) {
+// Tnstantiationg the HTTP server
+var httpServer = http.createServer(function(req, res) {
+  unifiedServer(req, res);
+});
+// Start the HTTP server
+httpServer.listen(config.httpPort, function() {
+  console.log(`The server is listen on port ${config.httpPort}`);
+});
+
+// Tnstantiationg the HTTPS server
+const httpsServerOptions = {
+  key: fs.readFileSync("./https/key.pem"),
+  cert: fs.readFileSync("./https/cert.pem")
+};
+var httpsServer = https.createServer(httpsServerOptions, function(req, res) {
+  unifiedServer(req, res);
+});
+// Start the HTTPS server
+httpsServer.listen(config.httpsPort, function() {
+  console.log(`The server is listen on port ${config.httpsPort}`);
+});
+
+// Define handlers
+const handlers = {};
+// sample handler
+// handlers.sample = function(data, callback) {
+//   // callback a hhtp status code and a payload object
+//   callback(406, { name: "sample handler" });
+// };
+// Ping handler
+handlers.ping = function(data, callback) {
+  callback(200);
+};
+
+// Not found handler
+handlers.notFound = function(data, callback) {
+  callback(404);
+};
+
+// Define a request router
+const router = {
+  ping: handlers.ping
+};
+
+// Unified server: all the server logic for both nhttp and https createServer
+const unifiedServer = function(req, res) {
   // Get the URL and parse it
   const parsedUrl = url.parse(req.url, true); // BTW 'true' means that we are getting as well the queried data (plus URL parsed)
   // Get the path from the URL
@@ -37,7 +84,7 @@ var server = http.createServer(function(req, res) {
   req.on("end", function() {
     buffer += decoder.end();
 
-    // choose the handler the request should go to, if not found use not found handler
+    // Choose the handler the request should go to, if not found use not found handler
     const chosenHandler =
       typeof router[trimmedPath] !== "undefined"
         ? router[trimmedPath]
@@ -68,28 +115,4 @@ var server = http.createServer(function(req, res) {
       console.log("Returning this response:", statusCode, payloadString);
     });
   });
-});
-
-// Start the server, and have it listen on port 3000
-server.listen(3000, function() {
-  console.log("The server is listen on port 3000 now");
-});
-
-// Define handlers
-const handlers = {};
-
-// sample handler
-handlers.sample = function(data, callback) {
-  // callback a hhtp status code and a payload object
-  callback(406, { name: "sample handler" });
-};
-
-// Not found handler
-handlers.notFound = function(data, callback) {
-  callback(404);
-};
-
-// Define a request router
-const router = {
-  sample: handlers.sample
 };
