@@ -13,8 +13,27 @@ const StringDecoder = require("string_decoder").StringDecoder;
 const config = require("./config");
 const fs = require("fs");
 
-// Tnstantiationg the HTTP server
-var httpServer = http.createServer(function(req, res) {
+// TESTING
+// @TODO delete this
+// const _data = require("./lib/data");
+// _data.create("test", "newFile", { foo: "bar" }, function(err) {
+//   console.log(`This was the error: ${err} `);
+// });
+
+// _data.read("test", "newFile1", function(err, data) {
+//   console.log("This was the error ", err, "and this was the data", data);
+// });
+
+// _data.update("test", "newFile", { fizz: "buzz" }, function(err) {
+//   console.log(`This was the error: ${err}`);
+// });
+
+// _data.delete("test", "newFile", function(err) {
+//   console.log(`This was the error: ${err}`);
+// });
+
+// Instantiating the HTTP server
+const httpServer = http.createServer(function(req, res) {
   unifiedServer(req, res);
 });
 // Start the HTTP server
@@ -22,12 +41,12 @@ httpServer.listen(config.httpPort, function() {
   console.log(`The server is listen on port ${config.httpPort}`);
 });
 
-// Tnstantiationg the HTTPS server
+// Instantiating the HTTPS server
 const httpsServerOptions = {
   key: fs.readFileSync("./https/key.pem"),
   cert: fs.readFileSync("./https/cert.pem")
 };
-var httpsServer = https.createServer(httpsServerOptions, function(req, res) {
+const httpsServer = https.createServer(httpsServerOptions, function(req, res) {
   unifiedServer(req, res);
 });
 // Start the HTTPS server
@@ -57,7 +76,7 @@ const router = {
   ping: handlers.ping
 };
 
-// Unified server: all the server logic for both nhttp and https createServer
+// Unified server: all the server logic for both http and https createServer
 const unifiedServer = function(req, res) {
   // Get the URL and parse it
   const parsedUrl = url.parse(req.url, true); // BTW 'true' means that we are getting as well the queried data (plus URL parsed)
