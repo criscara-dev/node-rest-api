@@ -10,8 +10,10 @@ const http = require("http");
 const https = require("https");
 const url = require("url");
 const StringDecoder = require("string_decoder").StringDecoder;
-const config = require("./config");
+const config = require("./lib/config");
 const fs = require("fs");
+const handlers = require("./lib/handlers");
+const helpers = require("./lib/helpers");
 
 // TESTING
 // @TODO delete this
@@ -54,26 +56,10 @@ httpsServer.listen(config.httpsPort, function() {
   console.log(`The server is listen on port ${config.httpsPort}`);
 });
 
-// Define handlers
-const handlers = {};
-// sample handler
-// handlers.sample = function(data, callback) {
-//   // callback a hhtp status code and a payload object
-//   callback(406, { name: "sample handler" });
-// };
-// Ping handler
-handlers.ping = function(data, callback) {
-  callback(200);
-};
-
-// Not found handler
-handlers.notFound = function(data, callback) {
-  callback(404);
-};
-
 // Define a request router
 const router = {
-  ping: handlers.ping
+  ping: handlers.ping,
+  users: handlers.users
 };
 
 // Unified server: all the server logic for both http and https createServer
@@ -115,7 +101,7 @@ const unifiedServer = function(req, res) {
       queryStringObject,
       method,
       headers,
-      payload: buffer
+      payload: helpers.parseJsonToObject(buffer)
     };
 
     // route the request to the handler specified in the router
