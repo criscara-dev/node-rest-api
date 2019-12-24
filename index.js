@@ -60,7 +60,8 @@ httpsServer.listen(config.httpsPort, function() {
 const router = {
   ping: handlers.ping,
   users: handlers.users,
-  tokens: handlers.tokens
+  tokens: handlers.tokens,
+  checks: handlers.checks
 };
 
 // Unified server: all the server logic for both http and https createServer
